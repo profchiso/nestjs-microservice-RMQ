@@ -61,7 +61,7 @@ To effectively contribute to this project, the following guideline should be fol
 ## Pages and Components
 
 - **Folder name**: Use snake-case for folder names.
-- **File name**: For file names, use lower-snake-case. E.g., `dto-file.ts`. Adding `.` to a filename should only specify the file extension or in some case, the type. Of course, there can always be an exception like in `index` files.
+- **File name**: use nestjs standard file naming. E.g., `file.dto.ts`.
 
 ## Types, Interfaces and Enums
 
