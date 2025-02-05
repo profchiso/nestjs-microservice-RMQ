@@ -1,0 +1,72 @@
+# version: '3'
+
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    hostname: rabbitmq
+    ports:
+      - '5672:5672'
+      - '15672:15672'
+    # environment:
+    #   RABBITMQ_DEFAULT_USER: 'admin'
+    #   RABBITMQ_DEFAULT_PASS: 'admin'
+    volumes:
+      - ./rabbitmq/data:/var/lib/rabbitmq
+      - ./rabbitmq/log:/var/log/rabbitmq
+    env_file:
+      - .env
+  auth:
+    build:
+      context: ./
+      dockerfile: ./apps/auth/Dockerfile
+    container_name: auth_service
+    env_file:
+      - .env
+    depends_on:
+      - rabbitmq
+      - postgres
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+    command: npm run start:dev auth
+
+  microservice:
+    build:
+      context: ./
+      dockerfile: ./apps/microservice/Dockerfile
+    container_name: microservice_service
+    ports:
+      - '5001:5001'
+    env_file:
+      - .env
+    depends_on:
+      - rabbitmq
+      - auth
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+    command: npm run start:dev microservice
+
+  postgres:
+    image: postgres:12
+    container_name: postgres
+    ports:
+      - '5432:5432'
+    env_file:
+      - .env
+    volumes:
+      - ./postgres/data:/var/lib/postgresql/data
+      - ./postgres/init:/docker-entrypoint-initdb.d
+  
+  postgres_admin:
+    image: dpage/pgadmin4
+    container_name: pgadmin
+    ports:
+      - '15432:80'
+    env_file:
+      - .env
+    depends_on:
+      - postgres
+    volumes:
+      - ./pgadmin:/var/lib/pgadmin
