@@ -1,73 +1,96 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
+# ERP D
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Welcome ERP.........
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Table of Contents
 
-## Description
+- [Introduction](#introduction)
+- [Getting Started](#getting-started)
+  - [Installation / Dependencies](#installation--dependencies)
+  - [Running the code](#running-the-code)
+- [Contributing to the Code Base](#contributing-to-the-code-base)
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+  - [Types, interfaces and enums](#types-interfaces-and-enums)
 
-## Installation
+- [Git](#git)
+  - [Commit Messages](#commit-messages)
+  - [Branching](#branching)
+  - [Pull Requests](#pull-requests)
 
-```bash
-$ npm install
-```
+# Introduction
 
-## Running the app
+Intro to to the ERP solution
 
-```bash
-# development
-$ npm run start
+# Getting Started
 
-# watch mode
-$ npm run start:dev
+Follow the steps below to get started with StorePro Web
 
-# production mode
-$ npm run start:prod
-```
+## Installation / Dependencies
 
-## Test
+- Install Node.Js
+- Install TypeScript
+- Install Git
 
-```bash
-# unit tests
-$ npm run test
+## Running the Code
 
-# e2e tests
-$ npm run test:e2e
+1. Clone the code repo from here
+   ```sh
+   git clone https://github.com/profchiso/nestjs-microservice-RMQ.git
+   ```
+2. Navigate to the project directory
+   ```sh
+   cd nestjs-microservice-RMQ
+   ```
+3. Install dependencies
+   ```sh
+   npm install
+   ```
+4. Run the application
+   ```sh
+   docker compose up
+   ```
+5. Run test
+   ```sh
+   npm test
+   ```
 
-# test coverage
-$ npm run test:cov
-```
+# Contributing to the Code Base
 
-## Support
+To effectively contribute to this project, the following guideline should be followed.
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+## Pages and Components
 
-## Stay in touch
+- **Folder name**: Use snake-case for folder names.
+- **File name**: For file names, use lower-snake-case. E.g., `dto-file.ts`. Adding `.` to a filename should only specify the file extension or in some case, the type. Of course, there can always be an exception like in `index` files.
 
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+## Types, Interfaces and Enums
 
-## License
+This is a typescript project and as such, typing is very important. For consistency across the project, please adhere to the below guidelines.
 
-Nest is [MIT licensed](LICENSE).
+- **Location**: All types, interfaces and enums should be declared in the `types` folder or in the shared libs if there are re-usable.
+- **No Inline Declarations**: No types or interfaces should be declared within a component file.
+- **Prefix**: Types should start with `T`, interfaces should start with `I`, and enums should start with `E`. E.g., `TUser`, `IUserProfile`, `EUserStatus`.
+- **Descriptive Names**: Use descriptive and clear names for types and interfaces.
+- **Avoid `any`**: Avoid using the `any` type. Use specific types or generics instead.
+- **Avoid `magic string`**: Avoid using magic strings
+
+## Git
+
+### Commit Messages
+
+- **Prefix with Jira Ticket Number**: All commit messages should start with the relevant Jira ticket number.
+- **Format**: Use the format `[JT-123] Commit message describing the change`.
+- **Descriptive Messages**: Write clear and concise commit messages that describe the change being made.
+
+### Branching
+
+- **Feature Branches**: Create feature branches for new features or bug fixes.
+- **Naming**: Use descriptive names for branches, prefixed with the Jira ticket number. E.g., `JT-123-add-authentication`.
+
+### Pull Requests
+
+- **Format**: Check pull request template
+- **Description**: Provide a clear description of the changes made in the pull request.
+- **Link to Jira Ticket**: Include a link to the relevant Jira ticket in the pull request description.
+- **Image**: If possible, add an image or screenshot to the pull request to illustrate the changes.
+- **Review**: Ensure that the code is reviewed and approved by at least one other team member before merging.
