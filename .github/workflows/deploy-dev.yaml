@@ -1,0 +1,95 @@
+# name: Deploy to Contabo ubuntu server
+
+# on:
+#   push:
+#     branches:
+#       - dev
+
+# jobs:
+#   deploy:
+#     runs-on: ubuntu-latest
+
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v3
+
+#       - name: Set up Node.js
+#         uses: actions/setup-node@v3
+#         with:
+#           node-version: 18
+
+#       - name: Set up SSH
+#         run: |
+#           mkdir -p ~/.ssh
+#           echo "${{ secrets.SSH_PRIVATE_KEY_GITHUB }}" > ~/.ssh/id_rsa
+#           chmod 600 ~/.ssh/id_rsa
+#           ssh-keyscan github.com >> ~/.ssh/known_hosts
+
+#       - name: Set Git remote to SSH
+#         run: git remote set-url origin git@github.com:Zijela-ICT/updcfm-be.git
+
+#       - name: Install dependencies
+#         run: npm install
+
+#       - name: Build application
+#         run: npm run build
+
+#       - name: Save SSH private key
+#         run: |
+#           echo "${{ secrets.SSH_PRIVATE_KEY }}" > private_key
+#           chmod 600 private_key
+
+#       - name: Deploy app
+#         uses: appleboy/ssh-action@v0.1.5
+#         with:
+#           host: ${{ secrets.SERVER_IP }}
+#           username: ${{ secrets.SERVER_USER }}
+#           key_path: private_key
+#           script: |
+#             cd /home/updcadmin/apps/updcfm-be
+#             git reset --hard
+#             git pull origin dev
+#             npm install --omit=dev
+#             npm run build
+#             pm2 restart updc-be
+
+name: Deploy to Ubuntu Server
+
+on:
+  push:
+    branches:
+      - dev
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Deploy App to server
+        uses: appleboy/ssh-action@v0.1.5
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_USER }}
+          password: ${{ secrets.SERVER_PASSWORD }}
+          script: |
+            echo "🚀 Connecting to server..."
+            cd /home/updcadmin/apps/updcfm-be
+            echo "🔄 Resetting repository..."
+            git reset --hard
+            echo "📦 Pulling latest changes from GitHub..."
+            git pull https://${{ secrets.USER }}:${{ secrets.TOKEN }}@github.com/Zijela-ICT/updcfm-be.git dev
+            echo "📦 Installing dependencies..."
+            npm install --omit=dev
+            echo "⚙️  Building application..."
+            npm run build
+            echo "♻️ Restarting application with PM2..."
+            pm2 restart updc-be
+            echo "✅ Deployment complete!"

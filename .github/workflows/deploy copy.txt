@@ -1,0 +1,127 @@
+name: Deploy to Server
+
+on:
+  push:
+    branches: [ dev ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    env:
+      CI: false
+      APP_PATH: /home/dami/backend
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Use Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '22.8.0'
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Build application
+      run: npm run build
+
+    - name: Debug SSH key
+      run: |
+        echo "$PRIVATE_KEY" > private_key
+        chmod 600 private_key
+        ssh-keygen -l -f private_key
+      env:
+        PRIVATE_KEY: ${{ secrets.LOCAL_MACHINE_PRIVATE_KEY }}
+
+    - name: Create .env file on server
+      env:
+        PRIVATE_KEY: ${{ secrets.LOCAL_MACHINE_PRIVATE_KEY }}
+        HOST: ${{ secrets.SERVER_HOST }}
+        USER: ${{ secrets.SERVER_USER }}
+        APP_PATH: /home/dami/backend
+      run: |
+        echo "$PRIVATE_KEY" > private_key
+        chmod 600 private_key
+        
+        # Create a temporary file with all secrets, excluding sensitive ones
+        echo "Creating temporary secrets file..."
+        echo '${{ toJson(secrets) }}' | jq -r '
+          to_entries
+          | map(select(.key != "github_token" and .key != "LOCAL_MACHINE_PRIVATE_KEY" and .key != "SERVER_HOST" and .key != "SERVER_USER"))
+          | map("\(.key)=\(.value | @sh)")
+          | .[]
+        ' > temp_secrets
+        
+        # Debug: Check contents of temp_secrets (keys only)
+        echo "Contents of temp_secrets (keys only):"
+        cut -d= -f1 temp_secrets
+        
+        # SCP the temporary file to the server
+        scp -i private_key -o StrictHostKeyChecking=no temp_secrets ${USER}@${HOST}:${APP_PATH}/temp_secrets
+        
+        # Remove the temporary file locally
+        rm temp_secrets
+        
+        # SSH into the server to create the .env file
+        ssh -i private_key -o StrictHostKeyChecking=no ${USER}@${HOST} << EOF
+          cd ${APP_PATH}
+          echo "Creating .env file..."
+          # Move temp_secrets to .env (no need to filter as we've already excluded unwanted secrets)
+          mv temp_secrets .env
+          chmod 600 .env
+          echo ".env file created successfully."
+          echo "Contents of .env file (keys only):"
+          cut -d= -f1 .env
+          echo "Number of lines in .env file:"
+          wc -l .env
+        EOF
+        
+        # Clean up the private key
+        rm private_key
+
+    - name: Deploy to Server
+      env:
+        PRIVATE_KEY: ${{ secrets.LOCAL_MACHINE_PRIVATE_KEY }}
+        HOST: ${{ secrets.SERVER_HOST }}
+        USER: ${{ secrets.SERVER_USER }}
+        APP_PATH: /home/dami/backend
+      run: |
+        echo "$PRIVATE_KEY" > private_key
+        chmod 600 private_key
+        ssh -i private_key -o StrictHostKeyChecking=no ${USER}@${HOST} 'echo "SSH connection successful"'
+        rsync -avz -e "ssh -i private_key -o StrictHostKeyChecking=no" --delete ./dist/ ${USER}@${HOST}:${APP_PATH}/dist/
+        rsync -avz -e "ssh -i private_key -o StrictHostKeyChecking=no" package.json ${USER}@${HOST}:${APP_PATH}/
+
+        ssh -i private_key -o StrictHostKeyChecking=no ${USER}@${HOST} << EOF
+          set -e
+          cd ${APP_PATH}
+          echo 'Current directory:' && pwd
+          echo 'Contents of ${APP_PATH}:'
+          ls -la ${APP_PATH}
+          if [ -f "package.json" ]; then
+            echo 'Running npm install'
+            npm install
+          else
+            echo "package.json not found in ${APP_PATH}"
+            exit 1
+          fi
+          echo 'Checking for existing PM2 process...'
+          if pm2 list | grep -q "backend"; then
+            echo 'PM2 process "backend" found. Stopping and deleting...'
+            pm2 stop backend
+            pm2 delete backend
+          else
+            echo 'PM2 process "backend" not found.'
+          fi
+          echo 'Starting new backend instance...'
+          export PATH=$PATH:/home/dami/.nvm/versions/node/v22.8.0/bin
+          pm2 start npm --name backend --cwd "${APP_PATH}" -- run start:prod
+          pm2 save
+          echo 'PM2 process started. Current PM2 list:'
+          pm2 list
+        EOF
+
+    - name: Cleanup
+      if: always()
+      run: rm -f private_key
